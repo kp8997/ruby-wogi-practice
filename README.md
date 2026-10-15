@@ -32,3 +32,4 @@ Some configuration detail about project
 ## Initialize database
 bin/rails db:create
 bin/rails db:migrate
+bin/rails db:seed
