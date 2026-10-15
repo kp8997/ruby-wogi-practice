@@ -3,12 +3,16 @@
 This README would normally document whatever steps are necessary to get the
 application up and running.
 
-Things you may want to cover:
+Some configuration detail about project
 
 * Ruby version
   3.4.11
 
 * System dependencies
+  brew install ruby-build
+  postgresql
+  gem install rails
+  gem install bundler
 
 * Configuration
 
@@ -23,3 +27,8 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+# HOW TO START PROJECT
+## Initialize database
+bin/rails db:create
+bin/rails db:migrate
