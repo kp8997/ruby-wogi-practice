@@ -67,3 +67,6 @@ end
 
 gem "grape", "~> 4.0"
 gem "grape-entity", "~> 1.1"
+
+gem "bcrypt", "~> 3.1"
+gem "jwt", "~> 3.3"

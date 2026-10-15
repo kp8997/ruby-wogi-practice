@@ -1,0 +1,13 @@
+class Client < ApplicationRecord
+  belongs_to :user
+
+  validates :name, presence: true
+  validates :payout_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+  validate :user_must_have_client_role
+
+  private
+
+  def user_must_have_client_role
+    errors.add(:user, "must have the client role") if user && !user.role_client?
+  end
+end
