@@ -12,5 +12,6 @@ Design database Schema for authentication & authorization with tables:
     password_confirmation (non-db column): confirm same value with password
     password_digest (db-column): Rails automatically hashes raw string and saves as secure string
     validation: on presence, confirmation of password and maximum byte length of password (<=72)
-    
+Design implementation strategies with handwritten and draw (excalidraw.com) and save link in the DESIGN.md
+
 # DAY 2
