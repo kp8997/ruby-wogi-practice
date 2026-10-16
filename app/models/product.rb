@@ -37,9 +37,11 @@ class Product < ApplicationRecord
       errors.add(:custom_fields, "must be a valid key-value object")
       return
     end
+
     if custom_fields.keys.size > 5
       errors.add(:custom_fields, "cannot contain more than 5 custom fields (current: #{custom_fields.keys.size})")
     end
+
     custom_fields.each do |key, value|
       if key.blank? || !key.is_a?(String)
         errors.add(:custom_fields, "keys must be non-empty strings")

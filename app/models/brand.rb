@@ -16,11 +16,11 @@ class Brand < ApplicationRecord
       errors.add(:custom_fields, "must be a valid key-value object")
       return
     end
-    # Check the maximum 5 custom fields limit
+
     if custom_fields.keys.size > 5
       errors.add(:custom_fields, "cannot contain more than 5 custom fields (current: #{custom_fields.keys.size})")
     end
-    # Check keys are strings and values are primitives type
+
     custom_fields.each do |key, value|
       if key.blank? || !key.is_a?(String)
         errors.add(:custom_fields, "keys must be non-empty strings")
