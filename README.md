@@ -36,7 +36,12 @@ bin/rails db:seed
 
 # DESIGN & IMPLEMENTATION STRATEGIES
 
-Link Excalidraw for details: https://excalidraw.com/#json=G8pbshRMjyxCJiJldNZm8,U04XEYfEBLRVtaV3kWyE0w
+Link Excalidraw for details:
+  v1: https://excalidraw.com/#json=G8pbshRMjyxCJiJldNZm8,U04XEYfEBLRVtaV3kWyE0w
+
+  v2: https://excalidraw.com/#json=nfxh5JExjir9jOqFAwFLa,TPHVUdGodrp_sVGQzGmJOw
+
+  v3: https://excalidraw.com/#json=KeLUos_g35wsSBnCmPkpC,wIpI_OKZBravS53lRvW77g
 
 Implementation Strategies
   
