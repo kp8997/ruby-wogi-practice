@@ -1,8 +1,7 @@
 class Product < ApplicationRecord
   belongs_to :brand
 
-  # we might have
-  # has_many :cards, dependent: :restrict_with_error
+  has_many :cards, dependent: :restrict_with_error
   has_many :client_product_accesses, dependent: :destroy
   has_many :clients, through: :client_product_accesses
 

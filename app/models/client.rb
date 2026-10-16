@@ -3,6 +3,7 @@ class Client < ApplicationRecord
 
   has_many :client_product_accesses, dependent: :destroy
   has_many :products, through: :client_product_accesses
+  has_many :cards, dependent: :restrict_with_error
 
   validates :name, presence: true
   validates :payout_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
