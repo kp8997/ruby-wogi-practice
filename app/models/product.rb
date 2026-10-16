@@ -20,14 +20,18 @@ class Product < ApplicationRecord
   validates :denomination, numericality: { greater_than: 0 }
   validates :currency, presence: true, format: { with: /\A[A-Z]{3}\z/ }
   validate :validate_custom_fields
+
   # Soft delete helper methods
   def soft_delete!
     update!(deleted_at: Time.current)
   end
+
   def discarded?
     deleted_at.present?
   end
+
   private
+
   def validate_custom_fields
     unless custom_fields.is_a?(Hash)
       errors.add(:custom_fields, "must be a valid key-value object")
