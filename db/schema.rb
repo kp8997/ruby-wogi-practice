@@ -10,9 +10,58 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_110200) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_174255) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "brands", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "state", default: "active", null: false
+    t.jsonb "custom_fields", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "index_brands_on_lower_name", unique: true
+    t.check_constraint "jsonb_typeof(custom_fields) = 'object'::text", name: "brands_custom_fields_object_check"
+    t.check_constraint "state::text = ANY (ARRAY['active'::character varying, 'inactive'::character varying]::text[])", name: "brands_state_check"
+  end
+
+  create_table "cards", force: :cascade do |t|
+    t.bigint "client_id", null: false
+    t.bigint "product_id", null: false
+    t.string "activation_number", limit: 16, null: false
+    t.string "pin"
+    t.string "idempotency_key", null: false
+    t.string "status", default: "issued", null: false
+    t.datetime "issued_at", null: false
+    t.datetime "cancelled_at"
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.string "currency", limit: 3, null: false
+    t.decimal "payout_rate", precision: 5, scale: 2, null: false
+    t.decimal "payout_amount", precision: 12, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activation_number"], name: "index_cards_on_activation_number", unique: true
+    t.index ["client_id", "idempotency_key"], name: "index_cards_on_client_id_and_idempotency_key", unique: true
+    t.index ["client_id", "issued_at"], name: "index_cards_on_client_id_and_issued_at"
+    t.index ["client_id"], name: "index_cards_on_client_id"
+    t.index ["product_id", "issued_at"], name: "index_cards_on_product_id_and_issued_at"
+    t.index ["product_id"], name: "index_cards_on_product_id"
+    t.check_constraint "activation_number::text ~ '^[0-9]{16}$'::text", name: "cards_activation_number_format_check"
+    t.check_constraint "amount > 0::numeric", name: "cards_amount_check"
+    t.check_constraint "payout_rate >= 0::numeric AND payout_rate <= 100::numeric", name: "cards_payout_rate_check"
+    t.check_constraint "status::text = 'issued'::text AND cancelled_at IS NULL OR status::text = 'cancelled'::text AND cancelled_at IS NOT NULL", name: "cards_lifecycle_check"
+    t.check_constraint "status::text = ANY (ARRAY['issued'::character varying, 'cancelled'::character varying]::text[])", name: "cards_status_check"
+  end
+
+  create_table "client_product_accesses", force: :cascade do |t|
+    t.bigint "client_id", null: false
+    t.bigint "product_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_id", "product_id"], name: "index_client_product_accesses_on_client_id_and_product_id", unique: true
+    t.index ["client_id"], name: "index_client_product_accesses_on_client_id"
+    t.index ["product_id"], name: "index_client_product_accesses_on_product_id"
+  end
 
   create_table "clients", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -22,6 +71,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_110200) do
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_clients_on_user_id", unique: true
     t.check_constraint "payout_rate >= 0::numeric AND payout_rate <= 100::numeric", name: "clients_payout_rate_check"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.bigint "brand_id", null: false
+    t.string "name", null: false
+    t.decimal "denomination", precision: 12, scale: 2, null: false
+    t.string "currency", limit: 3, null: false
+    t.boolean "requires_pin", default: false, null: false
+    t.string "state", default: "active", null: false
+    t.jsonb "custom_fields", default: {}, null: false
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "brand_id, lower((name)::text)", name: "index_products_on_brand_id_and_lower_name", unique: true, where: "(deleted_at IS NULL)"
+    t.index ["brand_id"], name: "index_products_on_brand_id"
+    t.index ["deleted_at"], name: "index_products_on_deleted_at"
+    t.check_constraint "currency::text ~ '^[A-Z]{3}$'::text", name: "products_currency_check"
+    t.check_constraint "denomination > 0::numeric", name: "products_denomination_check"
+    t.check_constraint "jsonb_typeof(custom_fields) = 'object'::text", name: "products_custom_fields_object_check"
+    t.check_constraint "state::text = ANY (ARRAY['active'::character varying, 'inactive'::character varying]::text[])", name: "products_state_check"
   end
 
   create_table "revoked_tokens", force: :cascade do |t|
@@ -48,6 +117,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_110200) do
     t.check_constraint "state::text = ANY (ARRAY['active'::character varying, 'inactive'::character varying]::text[])", name: "users_state_check"
   end
 
+  add_foreign_key "cards", "clients", on_delete: :restrict
+  add_foreign_key "cards", "products", on_delete: :restrict
+  add_foreign_key "client_product_accesses", "clients", on_delete: :cascade
+  add_foreign_key "client_product_accesses", "products", on_delete: :cascade
   add_foreign_key "clients", "users"
+  add_foreign_key "products", "brands", on_delete: :restrict
   add_foreign_key "revoked_tokens", "users"
 end

@@ -13,7 +13,7 @@ class CreateProducts < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :products, [ :brand_id, "LOWER(name)" ],
+    add_index :products, "brand_id, LOWER(name)",
               unique: true,
               where: "deleted_at IS NULL",
               name: "index_products_on_brand_id_and_lower_name"
