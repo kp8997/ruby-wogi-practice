@@ -44,7 +44,7 @@ Link Excalidraw for details:
   v3: https://excalidraw.com/#json=KeLUos_g35wsSBnCmPkpC,wIpI_OKZBravS53lRvW77g
 
   v4: https://excalidraw.com/#json=fYO_SU0Q_kpRLrfK3znVf,TOuve_cAfWPMxjbI8CLP1A
-  
+
 Implementation Strategies
   
   1. Design database from the requirements.
@@ -105,11 +105,15 @@ Design implementation strategies with handwritten and draw (excalidraw.com) and 
 
 Design database Schema for brands, product, clients and products permission, audit_logs
 Add function for brands, clients and products in model
-API implementation for users, clients
+Test on data with model - via rails console
+Define Seeds for convenient
 
 ## DAY 3
 
-API implementation for brands, product, clients and products permission, audit_logs
+API implementation for users, clients
+API implementation for brands, product, clients and products permission
+API implementation for audit_logs
+
 Verify by manual test
 
 ## DAY 4
