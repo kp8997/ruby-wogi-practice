@@ -3,7 +3,8 @@ class Product < ApplicationRecord
 
   # we might have
   # has_many :cards, dependent: :restrict_with_error
-  # has_many :client_product_accesses, dependent: :destroy
+  has_many :client_product_accesses, dependent: :destroy
+  has_many :clients, through: :client_product_accesses
 
   enum :state, { active: "active", inactive: "inactive" }
 
