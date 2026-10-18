@@ -10,9 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_174255) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_18_095043) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "audit_logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "action", null: false
+    t.string "record_type"
+    t.bigint "record_id"
+    t.jsonb "before_values"
+    t.jsonb "after_values"
+    t.jsonb "metadata", default: {}, null: false
+    t.string "ip_address", limit: 45
+    t.text "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["action", "created_at"], name: "index_audit_logs_on_action_and_created_at"
+    t.index ["created_at"], name: "index_audit_logs_on_created_at"
+    t.index ["record_type", "record_id"], name: "index_audit_logs_on_record_type_and_record_id"
+    t.index ["user_id", "created_at"], name: "index_audit_logs_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_audit_logs_on_user_id"
+    t.check_constraint "jsonb_typeof(metadata) = 'object'::text", name: "audit_logs_metadata_object_check"
+  end
 
   create_table "brands", force: :cascade do |t|
     t.string "name", null: false
@@ -117,6 +137,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_174255) do
     t.check_constraint "state::text = ANY (ARRAY['active'::character varying, 'inactive'::character varying]::text[])", name: "users_state_check"
   end
 
+  add_foreign_key "audit_logs", "users", on_delete: :nullify
   add_foreign_key "cards", "clients", on_delete: :restrict
   add_foreign_key "cards", "products", on_delete: :restrict
   add_foreign_key "client_product_accesses", "clients", on_delete: :cascade
