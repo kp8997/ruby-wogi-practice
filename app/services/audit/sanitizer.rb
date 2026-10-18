@@ -12,6 +12,7 @@ module Audit
           # Mask activation numbers: ************1234
           result[key] = "*" * 12 + value.to_s.last(4)
         elsif value.is_a?(Hash)
+          # Recursive sanitize for nested hash
           result[key] = clean(value)
         else
           result[key] = value

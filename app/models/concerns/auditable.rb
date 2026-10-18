@@ -17,11 +17,18 @@ module Auditable
   end
 
   def audit_update
+    # saved_changes here come from ActiveRecord, e.g
+    # {"user_name": ["old_name", "new_name"], "email": ["old_email", "new_email"]}
     changes = saved_changes.except("updated_at")
+
     return if changes.empty?
+
+    # before_diff: {"user_name": "old_name", "email": "old_email"}
+    # after_diff: {"user_name": "new_name", "email": "new_email"}
     before_diff = changes.transform_values(&:first)
     after_diff  = changes.transform_values(&:last)
 
+    # Because we have 3 kinds of log: toggle state, soft delete, and update
     action = if changes.key?("state")
       "#{self.class.name.underscore}.state_change"
     elsif changes.key?("deleted_at") && deleted_at.present?
