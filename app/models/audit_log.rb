@@ -1,7 +1,6 @@
 class AuditLog < ApplicationRecord
   belongs_to :user, optional: true
   validates :action, presence: true
-  validates :created_at, presence: true
 
   scope :recent, -> { order(created_at: :desc, id: :desc) }
   scope :for_action, ->(action) { where(action: action) if action.present? }
