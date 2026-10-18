@@ -1,4 +1,6 @@
 class Brand < ApplicationRecord
+  include Auditable
+
   has_many :products, dependent: :restrict_with_error
 
   enum :state, { active: "active", inactive: "inactive" }

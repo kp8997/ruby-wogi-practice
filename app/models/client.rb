@@ -1,4 +1,6 @@
 class Client < ApplicationRecord
+  include Auditable
+
   belongs_to :user
 
   has_many :client_product_accesses, dependent: :destroy

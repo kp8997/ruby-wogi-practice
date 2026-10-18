@@ -1,4 +1,6 @@
 class Product < ApplicationRecord
+  include Auditable
+
   belongs_to :brand
 
   has_many :cards, dependent: :restrict_with_error
