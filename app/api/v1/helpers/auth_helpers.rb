@@ -20,6 +20,8 @@ module V1
         @current_user = user
       end
 
+      # This error will be handled by grape that return a json with {error, message}
+      # And this error will not be caught by rescue_from
       def authenticate!
         error!({ error: "Unauthorized", message: "Invalid or expired token" }, 401) unless current_user
       end
