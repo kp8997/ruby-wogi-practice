@@ -50,6 +50,88 @@ Some configuration detail about project
 
 # HOW TO START PROJECT
 
+### Option 1: Docker Compose (Recommended)
+
+No local Ruby, Bundler, or PostgreSQL installation required. All dependencies and database services run containerized.
+
+1. **(Optional) Configure environment ports:**
+   If you have local services running on port 3000 or 5432, customize host ports by copying `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   # Edit APP_PORT or DB_PORT if needed (e.g., APP_PORT=3002 DB_PORT=5434)
+   ```
+
+2. **Build and start the application:**
+   ```bash
+   docker compose up --build
+   ```
+   > **Note:** The container entrypoint automatically waits for PostgreSQL readiness, clears any stale server PID, and runs `bundle exec rails db:prepare` (creating the database and running migrations/seeds).
+
+3. **Verify API is running:**
+   ```bash
+   curl http://localhost:3000/api/v1/ping
+   # Expected response: {"ping":"pong", ...}
+   ```
+
+4. **Initialize sample test data (Admin, Client, Catalog, Cards):**
+   ```bash
+   docker compose exec web ./bin/init_api_data.sh
+   # Or run from host: API_BASE_URL=http://localhost:3000/api/v1 ./bin/init_api_data.sh
+   ```
+
+5. **Run test suite (RSpec):**
+   ```bash
+   docker compose exec -e RAILS_ENV=test web bundle exec rspec
+   ```
+
+6. **Useful Docker commands:**
+   - **Interactive Rails Console:**
+     ```bash
+     docker compose exec web bin/rails console
+     ```
+   - **Run Migrations:**
+     ```bash
+     docker compose exec web bin/rails db:migrate
+     ```
+   - **Reset Database:**
+     ```bash
+     docker compose exec web bin/rails db:reset
+     ```
+   - **Stop Services:**
+     ```bash
+     docker compose down
+     # Or to wipe volumes/database:
+     docker compose down -v
+     ```
+
+---
+
+### Option 2: Manual Local Setup
+
+Requires local Ruby `3.4.11` and running PostgreSQL service:
+
+1. **Install gems:**
+   ```bash
+   bundle install
+   ```
+
+2. **Setup database:**
+   ```bash
+   bin/rails db:create db:migrate db:seed
+   ```
+
+3. **Start Rails server:**
+   ```bash
+   bin/rails server
+   ```
+
+4. **Run test suite:**
+   ```bash
+   bundle exec rspec
+   ```
+
+---
+
 # DESIGN & IMPLEMENTATION STRATEGIES
 This is my working space from requirement to breakdown into relevant thing of system design and flow to achieve the final working API.
 

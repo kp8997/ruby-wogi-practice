@@ -1,8 +1,22 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  ./bin/rails db:prepare
+# Remove stale pid file if server was not stopped gracefully
+rm -f /rails/tmp/pids/server.pid
+
+# Wait for PostgreSQL to be ready if POSTGRES_HOST is provided
+if [ -n "$POSTGRES_HOST" ]; then
+  echo "Waiting for PostgreSQL at ${POSTGRES_HOST}:${POSTGRES_PORT:-5432}..."
+  until pg_isready -h "$POSTGRES_HOST" -p "${POSTGRES_PORT:-5432}" -U "${POSTGRES_USER:-postgres}" >/dev/null 2>&1; do
+    sleep 1
+  done
+  echo "PostgreSQL is ready!"
 fi
 
-exec "${@}"
+# Automatically prepare database if booting rails server
+if [ "$1" = "bundle" ] && [ "$2" = "exec" ] && [ "$3" = "rails" ] && [ "$4" = "server" ]; then
+  echo "Preparing database (db:prepare)..."
+  bundle exec rails db:prepare
+fi
+
+exec "$@"
