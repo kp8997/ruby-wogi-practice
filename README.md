@@ -95,8 +95,11 @@ Implementation Strategies
   6. Any performance optimization in coding / database query if needed
 
   7. dockerize, make docker-compose.yml for database and rails
+
     - add rails environment variable for production & development
+
     - add secrets.yml for production env
+    
     - CI/CD if needed and have time
 
   8. (Optional) Define UI to test out those feature
