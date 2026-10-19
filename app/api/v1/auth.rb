@@ -7,6 +7,7 @@ module V1
         requires :password, type: String, desc: "User password"
       end
       post :login do
+        status 200
         user = User.find_by("lower(email) = ?", params[:email].strip.downcase)
 
         if user&.authenticate(params[:password])
