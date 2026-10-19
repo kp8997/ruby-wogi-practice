@@ -4,15 +4,19 @@ This README would normally document whatever steps are necessary to get the
 application up and running.
 
 Some specific external dependencies
+
   GrapeAPI
+
   Rspec
 
 Some configuration detail about project
 
 * Ruby version
+
   3.4.11
 
 * System dependencies
+
   rbenv
   rbenv-build
   postgresql
@@ -22,13 +26,16 @@ Some configuration detail about project
 * Configuration
 
 * Database creation
+
   bin/rails db:create
 
 * Database initialization
+
   bin/rails db:migrate
   bin/rails db:seed
 
 * How to run the test suite
+
   bundle exec rspec
 
 * Services (job queues, cache servers, search engines, etc.)
@@ -36,6 +43,7 @@ Some configuration detail about project
 * Deployment instructions
 
 * Support
+
   /postman: create importing file for all api along with data, authentication information to quickly test it
 
 * ...
@@ -99,9 +107,13 @@ Implementation Strategies
 ## DAY 1
 
 Initialize project
+
 Clean up unneccessary file
+
 Add some base library (grape api)
+
 Implement base API structure to test like helloworld
+
 Design database Schema for authentication & authorization with tables:
   users: client/admin role
   clients client role and client information
@@ -110,19 +122,26 @@ Design database Schema for authentication & authorization with tables:
     password_confirmation (non-db column): confirm same value with password
     password_digest (db-column): Rails automatically hashes raw string and saves as secure string
     validation: on presence, confirmation of password and maximum byte length of password (<=72)
-Design implementation strategies with handwritten and draw (excalidraw.com) and save link in the DESIGN.md
+
+Design implementation strategies with handwritten and draw (excalidraw.com) and save link in the 
+README.md
 
 ## DAY 2
 
 Design database Schema for brands, product, clients and products permission, audit_logs
+
 Add function for brands, clients and products in model
+
 Test on data with model - via rails console
+
 Define Seeds for convenient
 
 ## DAY 3
 
 API implementation for users, clients
+
 API implementation for brands, product, clients and products permission
+
 API implementation for audit_logs
 
 Verify by manual test
@@ -130,13 +149,19 @@ Verify by manual test
 ## DAY 4
 
 Add Rspec for Models and API
+
 Dockerize and containerize
+
 Verify by manual test for container
+
 Deployment
+
 CI/CD
 
 ## DAY 5
 
 Prepare Postman importing files
+
 Optional: make UI to test it
+
 Send to the hiring team
