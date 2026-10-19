@@ -20,6 +20,12 @@ FileUtils.chdir APP_ROOT do
   #   FileUtils.cp "config/database.yml.sample", "config/database.yml"
   # end
 
+  puts "\n== Checking encryption key =="
+  unless File.exist?("config/master.key") || ENV["RAILS_MASTER_KEY"]
+    puts "No master.key found. Generating a local credentials key pair..."
+    system!("bin/rails", "credentials:generate_key")
+  end
+
   puts "\n== Preparing database =="
   system! "bin/rails db:prepare"
   system! "bin/rails db:reset" if ARGV.include?("--reset")

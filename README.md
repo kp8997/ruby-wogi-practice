@@ -115,17 +115,33 @@ Requires local Ruby `3.4.11` and running PostgreSQL service:
    bundle install
    ```
 
-2. **Setup database:**
+2. **Configure Master Key / Credentials:**
+   Because `config/master.key` is gitignored for security, choose one of the following methods to obtain the encryption key:
+   - **Method A (Generate your own local key - Recommended):**
+     Run the helper task to generate a brand new `config/master.key` and matching `config/credentials.yml.enc`:
+     ```bash
+     bin/rails credentials:generate_key
+     ```
+     *(Or simply run `bin/setup` which does this automatically).*
+   - **Method B (Contact author for shared key):**
+     Copy `.env.example` to `.env` and paste the shared key:
+     ```bash
+     cp .env.example .env
+     # Set: RAILS_MASTER_KEY=<key_from_author>
+     ```
+     *(Or save the key directly to `config/master.key`).*
+
+3. **Setup database:**
    ```bash
    bin/rails db:create db:migrate db:seed
    ```
 
-3. **Start Rails server:**
+4. **Start Rails server:**
    ```bash
    bin/rails server
    ```
 
-4. **Run test suite:**
+5. **Run test suite:**
    ```bash
    bundle exec rspec
    ```
