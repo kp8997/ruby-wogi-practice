@@ -3,6 +3,10 @@
 This README would normally document whatever steps are necessary to get the
 application up and running.
 
+Some specific external dependencies
+  GrapeAPI
+  Rspec
+
 Some configuration detail about project
 
 * Ruby version
@@ -10,17 +14,21 @@ Some configuration detail about project
 
 * System dependencies
   brew install ruby-build
-  postgresql
+  brew install postgresql
   gem install rails
   gem install bundler
 
 * Configuration
 
 * Database creation
+bin/rails db:create
 
 * Database initialization
+bin/rails db:migrate
+bin/rails db:seed
 
 * How to run the test suite
+bundle exec rspec
 
 * Services (job queues, cache servers, search engines, etc.)
 
@@ -29,10 +37,6 @@ Some configuration detail about project
 * ...
 
 # HOW TO START PROJECT
-## Initialize database
-bin/rails db:create
-bin/rails db:migrate
-bin/rails db:seed
 
 # DESIGN & IMPLEMENTATION STRATEGIES
 
@@ -46,7 +50,7 @@ Link Excalidraw for details:
   v4: https://excalidraw.com/#json=fYO_SU0Q_kpRLrfK3znVf,TOuve_cAfWPMxjbI8CLP1A
 
   v5: https://excalidraw.com/#json=uR3CZ1YzpEU2Am5SZtJ7q,nK_w4PE2qGXQ5y8UOYM25Q
-  
+
 Implementation Strategies
   
   1. Design database from the requirements.
@@ -128,5 +132,6 @@ CI/CD
 
 ## DAY 5
 
+Prepare Postman importing files
 Optional: make UI to test it
 Send to the hiring team
