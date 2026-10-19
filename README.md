@@ -45,6 +45,8 @@ Link Excalidraw for details:
 
   v4: https://excalidraw.com/#json=fYO_SU0Q_kpRLrfK3znVf,TOuve_cAfWPMxjbI8CLP1A
 
+  v5: https://excalidraw.com/#json=uR3CZ1YzpEU2Am5SZtJ7q,nK_w4PE2qGXQ5y8UOYM25Q
+  
 Implementation Strategies
   
   1. Design database from the requirements.
