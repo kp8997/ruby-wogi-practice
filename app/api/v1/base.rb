@@ -31,5 +31,7 @@ module V1
     mount V1::Admin::Clients
     mount V1::Admin::Brands
     mount V1::Admin::Products
+    mount V1::Admin::AuditLogs
+    mount V1::Admin::Reports
   end
 end
