@@ -17,7 +17,7 @@ class Product < ApplicationRecord
   scope :discarded, -> { where.not(deleted_at: nil) }
 
   validates :name, presence: true
-  validates :name, uniqueness: { scope: :brand_id, case_sensitive: false }, if: -> { deleted_at.nil? }
+  validates :name, uniqueness: { scope: :brand_id, case_sensitive: false, conditions: -> { kept } }, if: -> { deleted_at.nil? }
   validates :denomination, numericality: { greater_than: 0 }
   validates :currency, presence: true, format: { with: /\A[A-Z]{3}\z/ }
   validate :validate_custom_fields
