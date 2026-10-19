@@ -28,6 +28,20 @@ module V1
         error!({ error: "Unauthorized", message: "Invalid or expired token" }, 401) unless current_user
       end
 
+      def authorize_admin!
+        authenticate!
+        error!({ error: "Forbidden", message: "Admin access required" }, 403) unless current_user.role_admin?
+      end
+
+      def authorize_client!
+        authenticate!
+        error!({ error: "Forbidden", message: "Client access required" }, 403) unless current_user.role_client?
+      end
+
+      def current_client
+        @current_client ||= current_user&.client
+      end
+
       def current_token_payload
         @token_payload
       end

@@ -27,5 +27,6 @@ module V1
     # Mount resource endpoints
     mount V1::Ping
     mount V1::Auth
+    mount V1::Admin::Users
   end
 end
