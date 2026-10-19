@@ -28,5 +28,6 @@ module V1
     mount V1::Ping
     mount V1::Auth
     mount V1::Admin::Users
+    mount V1::Admin::Clients
   end
 end

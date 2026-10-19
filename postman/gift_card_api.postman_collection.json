@@ -1,0 +1,1147 @@
+{
+  "info": {
+    "_postman_id": "7f89d3a1-2d34-4b52-9c12-8e34589d1234",
+    "name": "Gift Card API",
+    "description": "Comprehensive Postman collection for the Gift Card API platform (Ruby 3.4.x, Rails 8.1.x, Grape, PostgreSQL). Includes sequential flows for Admin management (Users, Clients, Brands, Products, Permissions, Audit Logs, Reports) and Client operations (Catalog search, Card issuance with idempotency, Card cancellation, and Spending reports).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@example.com",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "Admin@12345",
+      "type": "string"
+    },
+    {
+      "key": "client_email",
+      "value": "client1@example.com",
+      "type": "string"
+    },
+    {
+      "key": "client_password",
+      "value": "Client@12345",
+      "type": "string"
+    },
+    {
+      "key": "client_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "brand_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "card_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Authentication Flow",
+      "description": "Authentication endpoints: Login as Admin, Login as Client, and Logout (JWT token revocation).",
+      "item": [
+        {
+          "name": "1. Admin Login (AUTH-1, ADM-1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (pm.response.code === 200 && jsonData.token) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.token);",
+                  "    console.log('authToken captured successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in with the seed admin account and saves the resulting JWT token in collection variable `authToken`."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Client Login (AUTH-1, CLI-1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (pm.response.code === 200 && jsonData.token) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.token);",
+                  "    console.log('authToken captured successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{client_email}}\",\n  \"password\": \"{{client_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in with client credentials and saves JWT token in collection variable `authToken`."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Logout (AUTH-9)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revokes the active JWT token by recording its JTI in RevokedToken. Further calls with this token will return 401."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. Admin - User & Client Management",
+      "description": "Admin operations to create secondary admins, create clients with initial credentials and payout rate, update clients, and toggle state.",
+      "item": [
+        {
+          "name": "1. Create Secondary Admin (AUTH-3)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ops_admin@example.com\",\n  \"password\": \"Admin@12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            },
+            "description": "Creates a new admin account (role: admin, state: active). Audited as user.create."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Create Client (AUTH-4, ADM-5)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (pm.response.code === 201 && jsonData.client && jsonData.client.id) {",
+                  "    pm.collectionVariables.set('client_id', jsonData.client.id);",
+                  "    console.log('client_id set to ' + jsonData.client.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Global Partners\",\n  \"email\": \"acme_global@example.com\",\n  \"password\": \"Client@12345\",\n  \"payout_rate\": 6.25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "clients"
+              ]
+            },
+            "description": "Creates a client User (role: client) and Client profile with payout_rate within a transaction. Saves client_id."
+          },
+          "response": []
+        },
+        {
+          "name": "3. List Clients (ADM-5)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/clients?page=1&per_page=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Paginated list of clients with user details, payout_rate, and state."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Client by ID (ADM-5)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/clients/{{client_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "clients",
+                "{{client_id}}"
+              ]
+            },
+            "description": "Fetches a single client by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Update Client (ADM-5, LOG-2)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Global Superstore\",\n  \"payout_rate\": 7.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/clients/{{client_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "clients",
+                "{{client_id}}"
+              ]
+            },
+            "description": "Updates client name and/or payout_rate. Audits before and after values (client.update)."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Toggle Client State (ADM-9, AUTH-8)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/clients/{{client_id}}/state",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "clients",
+                "{{client_id}}",
+                "state"
+              ]
+            },
+            "description": "Sets client user state to active or inactive. When inactive, the client cannot log in or call APIs."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03. Admin - Brand Catalog Management",
+      "description": "Create, view, update, list brands, and toggle brand active/inactive states.",
+      "item": [
+        {
+          "name": "1. Create Brand (ADM-2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (pm.response.code === 201 && jsonData.brand && jsonData.brand.id) {",
+                  "    pm.collectionVariables.set('brand_id', jsonData.brand.id);",
+                  "    console.log('brand_id set to ' + jsonData.brand.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Books Online\",\n  \"state\": \"active\",\n  \"custom_fields\": {\n    \"category\": \"Books & Stationery\",\n    \"website\": \"https://acmebooks.com\",\n    \"support_email\": \"help@acmebooks.com\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/brands",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "brands"
+              ]
+            },
+            "description": "Creates a brand with up to 5 custom key-value metadata fields. Saves brand_id."
+          },
+          "response": []
+        },
+        {
+          "name": "2. List Brands (ADM-2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/brands?page=1&per_page=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "brands"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lists brands with pagination and state filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Brand by ID (ADM-2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/brands/{{brand_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "brands",
+                "{{brand_id}}"
+              ]
+            },
+            "description": "Fetches a specific brand."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Update Brand (ADM-2, LOG-2)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Books & Media\",\n  \"custom_fields\": {\n    \"category\": \"Entertainment\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/brands/{{brand_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "brands",
+                "{{brand_id}}"
+              ]
+            },
+            "description": "Updates brand name and custom fields. Logs brand.update with before/after diff."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Toggle Brand State (ADM-4)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/brands/{{brand_id}}/state",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "brands",
+                "{{brand_id}}",
+                "state"
+              ]
+            },
+            "description": "Toggles brand between active and inactive. Logs brand.state_change."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04. Admin - Product Catalog & Access Permissions",
+      "description": "Create products under brands, manage client accessible products (whitelist), and soft delete products.",
+      "item": [
+        {
+          "name": "1. Create Product (ADM-3)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (pm.response.code === 201 && jsonData.product && jsonData.product.id) {",
+                  "    pm.collectionVariables.set('product_id', jsonData.product.id);",
+                  "    console.log('product_id set to ' + jsonData.product.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brand_id\": {{brand_id}},\n  \"name\": \"Acme $50 E-Gift Card\",\n  \"denomination\": 50.00,\n  \"currency\": \"USD\",\n  \"requires_pin\": false,\n  \"state\": \"active\",\n  \"custom_fields\": {\n    \"sku\": \"ACME-50-USD\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "products"
+              ]
+            },
+            "description": "Creates a product under a brand. Saves product_id."
+          },
+          "response": []
+        },
+        {
+          "name": "2. List Products (ADM-3)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/products?brand_id={{brand_id}}&page=1&per_page=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "brand_id",
+                  "value": "{{brand_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lists products filtered by brand, state, or pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Product by ID (ADM-3)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/products/{{product_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "products",
+                "{{product_id}}"
+              ]
+            },
+            "description": "Fetches a single product."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Assign Product Access to Client (ADM-6)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_ids\": [{{product_id}}]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/clients/{{client_id}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "clients",
+                "{{client_id}}",
+                "products"
+              ]
+            },
+            "description": "Grants access for the client to issue cards for this product."
+          },
+          "response": []
+        },
+        {
+          "name": "5. List Client Product Permissions (ADM-6)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/clients/{{client_id}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "clients",
+                "{{client_id}}",
+                "products"
+              ]
+            },
+            "description": "Lists all products accessible to a specific client."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Soft Delete Product (ADM-3)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/products/{{product_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "products",
+                "{{product_id}}"
+              ]
+            },
+            "description": "Soft deletes a product setting deleted_at timestamp. Audited as product.delete."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05. Client - Catalog Browsing & Card Lifecycle",
+      "description": "Client workflow: Search assigned catalog, issue card with idempotency, check idempotency retry, view cards, and cancel card.",
+      "item": [
+        {
+          "name": "1. Client Browse Catalog (CLI-2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/catalog?query=Acme",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Acme"
+                }
+              ]
+            },
+            "description": "Searches and filters active products assigned to the authenticated client."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Issue Gift Card (CLI-3, CLI-4)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (pm.response.code === 201 && jsonData.card && jsonData.card.id) {",
+                  "    pm.collectionVariables.set('card_id', jsonData.card.id);",
+                  "    console.log('card_id set to ' + jsonData.card.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": {{product_id}},\n  \"idempotency_key\": \"order-trans-{{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards"
+              ]
+            },
+            "description": "Issues a gift card. Snapshots client's current payout_rate onto card, generates a 16-digit activation number, and saves card_id."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Retry Card Issuance (Safe Idempotency Check CLI-4)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": {{product_id}},\n  \"idempotency_key\": \"idempotent-test-key-001\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards"
+              ]
+            },
+            "description": "Calling this repeatedly with the same idempotency_key safely returns the existing card record without creating duplicates."
+          },
+          "response": []
+        },
+        {
+          "name": "4. List Issued Cards (CLI-1)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cards?page=1&per_page=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lists cards issued by the authenticated client."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Card Details (CLI-1)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cards/{{card_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards",
+                "{{card_id}}"
+              ]
+            },
+            "description": "Fetches a single card by ID (scoped to the authenticated client)."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Cancel Issued Card (CLI-6)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cards/{{card_id}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cards",
+                "{{card_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Transitions card from issued to cancelled. Records card.cancel in audit log."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06. Admin - Audit Logs & Reporting",
+      "description": "Admin endpoints to query immutable audit logs and aggregate financial reports.",
+      "item": [
+        {
+          "name": "1. List Audit Logs (ADM-7, LOG-5)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/audit_logs?page=1&per_page=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "audit_logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lists immutable audit logs (newest first) with user, action, IP, user_agent, before/after values, and metadata."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Filter Audit Logs (LOG-5)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/audit_logs?action=card.issue&record_type=Card",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "audit_logs"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "card.issue"
+                },
+                {
+                  "key": "record_type",
+                  "value": "Card"
+                }
+              ]
+            },
+            "description": "Filters audit logs by action, record_type, user_id, or date range."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Admin Report by Brand (REP-1)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports/brands?from_date=2026-01-01&to_date=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reports",
+                "brands"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-12-31"
+                }
+              ]
+            },
+            "description": "Calculates totals in the database grouped by Brand over the requested date range."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Admin Report by Client (REP-2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports/clients?from_date=2026-01-01&to_date=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reports",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-12-31"
+                }
+              ]
+            },
+            "description": "Calculates totals in the database grouped by Client over the requested date range."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07. Client - Reports",
+      "description": "Client reports for own spending and card issuance/cancellation history.",
+      "item": [
+        {
+          "name": "1. Client Spending Report (REP-3, CLI-7)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/spending?from_date=2026-01-01&to_date=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "spending"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-12-31"
+                }
+              ]
+            },
+            "description": "Calculates spending, payout amounts, and card cancellation summary for the authenticated client."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

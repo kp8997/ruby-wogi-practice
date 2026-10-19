@@ -13,32 +13,37 @@ Some configuration detail about project
   3.4.11
 
 * System dependencies
-  brew install ruby-build
-  brew install postgresql
-  gem install rails
-  gem install bundler
+  rbenv
+  rbenv-build
+  postgresql
+  rails 7.2.5
+  bundler 3.3.5
 
 * Configuration
 
 * Database creation
-bin/rails db:create
+  bin/rails db:create
 
 * Database initialization
-bin/rails db:migrate
-bin/rails db:seed
+  bin/rails db:migrate
+  bin/rails db:seed
 
 * How to run the test suite
-bundle exec rspec
+  bundle exec rspec
 
 * Services (job queues, cache servers, search engines, etc.)
 
 * Deployment instructions
+
+* Support
+  /postman: create importing file for all api along with data, authentication information to quickly test it
 
 * ...
 
 # HOW TO START PROJECT
 
 # DESIGN & IMPLEMENTATION STRATEGIES
+This is my working space from requirement to breakdown into relevant thing of system design and flow to achieve the final working API.
 
 Link Excalidraw for details:
   v1: https://excalidraw.com/#json=G8pbshRMjyxCJiJldNZm8,U04XEYfEBLRVtaV3kWyE0w
