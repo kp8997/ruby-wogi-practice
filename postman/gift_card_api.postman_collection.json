@@ -599,15 +599,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"brand_id\": {{brand_id}},\n  \"name\": \"Acme $50 E-Gift Card\",\n  \"denomination\": 50.00,\n  \"currency\": \"USD\",\n  \"requires_pin\": false,\n  \"state\": \"active\",\n  \"custom_fields\": {\n    \"sku\": \"ACME-50-USD\"\n  }\n}"
+              "raw": "{\n  \"name\": \"Acme $50 E-Gift Card\",\n  \"denomination\": 50.0,\n  \"currency\": \"USD\",\n  \"requires_pin\": false,\n  \"state\": \"active\",\n  \"custom_fields\": {\n    \"sku\": \"ACME-50-USD\"\n  }\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/admin/products",
+              "raw": "{{baseUrl}}/admin/brands/{{brand_id}}/products",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "admin",
+                "brands",
+                "{{brand_id}}",
                 "products"
               ]
             },
@@ -626,19 +628,17 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/admin/products?brand_id={{brand_id}}&page=1&per_page=20",
+              "raw": "{{baseUrl}}/admin/brands/{{brand_id}}/products?page=1&per_page=20",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "admin",
+                "brands",
+                "{{brand_id}}",
                 "products"
               ],
               "query": [
-                {
-                  "key": "brand_id",
-                  "value": "{{brand_id}}"
-                },
                 {
                   "key": "page",
                   "value": "1"
@@ -694,10 +694,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"product_ids\": [{{product_id}}]\n}"
+              "raw": "{\n  \"product_id\": {{product_id}}\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/admin/clients/{{client_id}}/products",
+              "raw": "{{baseUrl}}/admin/clients/{{client_id}}/product_accesses",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -705,7 +705,7 @@
                 "admin",
                 "clients",
                 "{{client_id}}",
-                "products"
+                "product_accesses"
               ]
             },
             "description": "Grants access for the client to issue cards for this product."
@@ -723,7 +723,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/admin/clients/{{client_id}}/products",
+              "raw": "{{baseUrl}}/admin/clients/{{client_id}}/product_accesses",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -731,7 +731,7 @@
                 "admin",
                 "clients",
                 "{{client_id}}",
-                "products"
+                "product_accesses"
               ]
             },
             "description": "Lists all products accessible to a specific client."
@@ -739,7 +739,34 @@
           "response": []
         },
         {
-          "name": "6. Soft Delete Product (ADM-3)",
+          "name": "6. Revoke Product Access from Client (ADM-6)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/clients/{{client_id}}/product_accesses/{{product_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "clients",
+                "{{client_id}}",
+                "product_accesses",
+                "{{product_id}}"
+              ]
+            },
+            "description": "Revokes accessible product from a client."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Soft Delete Product (ADM-3)",
           "request": {
             "method": "DELETE",
             "header": [

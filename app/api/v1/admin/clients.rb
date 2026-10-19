@@ -56,7 +56,7 @@ module V1
             requires :email, type: String, regexp: URI::MailTo::EMAIL_REGEXP, desc: "Client login email"
             requires :password, type: String, desc: "Client login password"
             requires :name, type: String, desc: "Client business/partner name"
-            requires :payout_rate, type: Float, values: 0.0..100.0, desc: "Client payout rate (percentage)"
+            requires :payout_rate, type: BigDecimal, values: (BigDecimal("0.0")..BigDecimal("100.0")), desc: "Client payout rate (percentage)"
           end
           post do
             client = nil
@@ -135,7 +135,7 @@ module V1
             desc "Update client details (ADM-5, LOG-1, LOG-2)"
             params do
               optional :name, type: String, desc: "Client business name"
-              optional :payout_rate, type: Float, values: 0.0..100.0, desc: "Client payout rate"
+              optional :payout_rate, type: BigDecimal, values: (BigDecimal("0.0")..BigDecimal("100.0")), desc: "Client payout rate"
             end
             patch do
               client = Client.includes(:user).find(params[:id])
@@ -200,6 +200,78 @@ module V1
                   }
                 }
               }
+            end
+
+            resource :product_accesses do
+              desc "List accessible products for a client (ADM-6, AUTH-6)"
+              get do
+                client = Client.find(params[:id])
+                products = client.products.kept.order(:id)
+
+                {
+                  product_accesses: products.map do |prod|
+                    {
+                      product_id: prod.id,
+                      brand_id: prod.brand_id,
+                      name: prod.name,
+                      denomination: prod.denomination,
+                      currency: prod.currency,
+                      requires_pin: prod.requires_pin,
+                      state: prod.state
+                    }
+                  end
+                }
+              end
+
+              desc "Grant accessible product to a client (ADM-6, LOG-1, LOG-2)"
+              params do
+                requires :product_id, type: Integer, desc: "Product ID to grant access to"
+              end
+              post do
+                client = Client.find(params[:id])
+                product = Product.kept.find(params[:product_id])
+
+                access = ClientProductAccess.find_or_initialize_by(client: client, product: product)
+                is_new = access.new_record?
+
+                if is_new
+                  access.save!
+                  ::Audit::Recorder.record!(
+                    action: "client_product_access.create",
+                    record: access,
+                    after: { client_id: client.id, product_id: product.id },
+                    metadata: { client_id: client.id, product_id: product.id }
+                  )
+                end
+
+                status(is_new ? 201 : 200)
+                {
+                  product_access: {
+                    client_id: client.id,
+                    product_id: product.id
+                  }
+                }
+              end
+
+              route_param :product_id, type: Integer do
+                desc "Revoke accessible product from a client (ADM-6, LOG-1, LOG-2)"
+                delete do
+                  client = Client.find(params[:id])
+                  access = client.client_product_accesses.find_by(product_id: params[:product_id])
+
+                  if access
+                    access.destroy!
+                    ::Audit::Recorder.record!(
+                      action: "client_product_access.delete",
+                      record: access,
+                      before: { client_id: client.id, product_id: params[:product_id] },
+                      metadata: { client_id: client.id, product_id: params[:product_id] }
+                    )
+                  end
+
+                  { message: "Product access revoked successfully" }
+                end
+              end
             end
           end
         end
