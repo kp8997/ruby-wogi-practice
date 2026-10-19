@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Card < ApplicationRecord
   belongs_to :client
   belongs_to :product
@@ -35,6 +37,7 @@ class Card < ApplicationRecord
     end
   end
 
+  # Create unique number, if number is existing in database, loop the process
   def self.generate_activation_number
     loop do
       number = SecureRandom.random_number(10**16).to_s.rjust(16, "0")
@@ -44,6 +47,8 @@ class Card < ApplicationRecord
 
   private
 
+  # payout_rate will be populated in card issue method by copy from current client
+  # Calculate payout_amound (real money) base on payout_rate
   def set_defaults_and_snapshots
     self.issued_at ||= Time.current
     self.activation_number ||= self.class.generate_activation_number

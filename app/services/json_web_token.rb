@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class JsonWebToken
   SECRET_KEY = Rails.application.secret_key_base
 

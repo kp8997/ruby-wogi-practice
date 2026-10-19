@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Audit
   class Sanitizer
     FILTERED_KEYS = %w[password password_digest password_confirmation pin].freeze

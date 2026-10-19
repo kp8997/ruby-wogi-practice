@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Audit
   class Recorder
     def self.record!(action:, record: nil, before: nil, after: nil, metadata: {})

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ClientProductAccess < ApplicationRecord
   belongs_to :client
   belongs_to :product
