@@ -16,7 +16,7 @@ module V1
             optional :state, type: String, values: %w[active inactive], desc: "Filter by user account state"
           end
           get do
-            scope = Client.includes(:user).order(id: :desc)
+            scope = ::Client.includes(:user).order(id: :desc)
             scope = scope.joins(:user).where(users: { state: params[:state] }) if params[:state].present?
 
             total_count = scope.count
@@ -81,7 +81,7 @@ module V1
                 metadata: { role: "client", email: user.email }
               )
 
-              client = Client.new(
+              client = ::Client.new(
                 user: user,
                 name: params[:name].to_s.strip,
                 payout_rate: params[:payout_rate]
@@ -113,7 +113,7 @@ module V1
           route_param :id, type: Integer do
             desc "Get details of a specific client (ADM-5, AUTH-6)"
             get do
-              client = Client.includes(:user).find(params[:id])
+              client = ::Client.includes(:user).find(params[:id])
 
               {
                 client: {
@@ -138,7 +138,7 @@ module V1
               optional :payout_rate, type: BigDecimal, values: (BigDecimal("0.0")..BigDecimal("100.0")), desc: "Client payout rate"
             end
             patch do
-              client = Client.includes(:user).find(params[:id])
+              client = ::Client.includes(:user).find(params[:id])
 
               update_params = {}
               update_params[:name] = params[:name].to_s.strip if params[:name].present?
@@ -170,7 +170,7 @@ module V1
               requires :state, type: String, values: %w[active inactive], desc: "Target account state"
             end
             patch :state do
-              client = Client.includes(:user).find(params[:id])
+              client = ::Client.includes(:user).find(params[:id])
               user = client.user
 
               old_state = user.state
@@ -205,7 +205,7 @@ module V1
             resource :product_accesses do
               desc "List accessible products for a client (ADM-6, AUTH-6)"
               get do
-                client = Client.find(params[:id])
+                client = ::Client.find(params[:id])
                 products = client.products.kept.order(:id)
 
                 {
@@ -228,7 +228,7 @@ module V1
                 requires :product_id, type: Integer, desc: "Product ID to grant access to"
               end
               post do
-                client = Client.find(params[:id])
+                client = ::Client.find(params[:id])
                 product = Product.kept.find(params[:product_id])
 
                 access = ClientProductAccess.find_or_initialize_by(client: client, product: product)
@@ -256,7 +256,7 @@ module V1
               route_param :product_id, type: Integer do
                 desc "Revoke accessible product from a client (ADM-6, LOG-1, LOG-2)"
                 delete do
-                  client = Client.find(params[:id])
+                  client = ::Client.find(params[:id])
                   access = client.client_product_accesses.find_by(product_id: params[:product_id])
 
                   if access

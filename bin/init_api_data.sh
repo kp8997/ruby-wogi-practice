@@ -157,7 +157,7 @@ if [ -n "$CLIENT_TOKEN" ]; then
   if [ -n "$PRODUCT_ID" ]; then
     echo -e "\n${YELLOW}[7/8] Client issuing Gift Card (CLI-3, CLI-4)...${NC}"
     IDEMPOTENCY_KEY="cli-order-$(date +%s)"
-    ISSUE_RESP=$(curl -s -X POST "${BASE_URL}/cards" \
+    ISSUE_RESP=$(curl -s -X POST "${BASE_URL}/client/cards" \
       -H "Content-Type: application/json" \
       -H "Authorization: Bearer ${CLIENT_TOKEN}" \
       -d "{\"product_id\": ${PRODUCT_ID}, \"idempotency_key\": \"${IDEMPOTENCY_KEY}\"}")
@@ -168,7 +168,7 @@ if [ -n "$CLIENT_TOKEN" ]; then
     
     # Cancel card
     echo -e "${YELLOW}Client cancelling Gift Card (CLI-6)...${NC}"
-    CANCEL_RESP=$(curl -s -X POST "${BASE_URL}/cards/${CARD_ID}/cancel" \
+    CANCEL_RESP=$(curl -s -X POST "${BASE_URL}/client/cards/${CARD_ID}/cancel" \
       -H "Authorization: Bearer ${CLIENT_TOKEN}")
     echo -e "${GREEN}✓ Card ${CARD_ID} cancelled successfully.${NC}"
   fi

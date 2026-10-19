@@ -54,7 +54,7 @@ class Card < ApplicationRecord
     self.activation_number ||= self.class.generate_activation_number
 
     if amount.present? && payout_rate.present?
-      self.payout_amount ||= (amount * payout_rate / 100.0).round(2)
+      self.payout_amount ||= (amount.to_d * payout_rate.to_d / BigDecimal("100")).round(2)
     end
   end
 end

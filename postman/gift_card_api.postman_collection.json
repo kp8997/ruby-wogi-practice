@@ -807,12 +807,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/catalog?query=Acme",
+              "raw": "{{baseUrl}}/client/products?query=Acme",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "catalog"
+                "client",
+                "products"
               ],
               "query": [
                 {
@@ -859,11 +860,12 @@
               "raw": "{\n  \"product_id\": {{product_id}},\n  \"idempotency_key\": \"order-trans-{{$timestamp}}\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/cards",
+              "raw": "{{baseUrl}}/client/cards",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "client",
                 "cards"
               ]
             },
@@ -890,11 +892,12 @@
               "raw": "{\n  \"product_id\": {{product_id}},\n  \"idempotency_key\": \"idempotent-test-key-001\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/cards",
+              "raw": "{{baseUrl}}/client/cards",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "client",
                 "cards"
               ]
             },
@@ -913,11 +916,12 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/cards?page=1&per_page=20",
+              "raw": "{{baseUrl}}/client/cards?page=1&per_page=20",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "client",
                 "cards"
               ],
               "query": [
@@ -946,11 +950,12 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/cards/{{card_id}}",
+              "raw": "{{baseUrl}}/client/cards/{{card_id}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "client",
                 "cards",
                 "{{card_id}}"
               ]
@@ -970,11 +975,12 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/cards/{{card_id}}/cancel",
+              "raw": "{{baseUrl}}/client/cards/{{card_id}}/cancel",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "client",
                 "cards",
                 "{{card_id}}",
                 "cancel"
@@ -1145,11 +1151,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/reports/spending?from_date=2026-01-01&to_date=2026-12-31",
+              "raw": "{{baseUrl}}/client/cards/reports/spending?from_date=2026-01-01&to_date=2026-12-31",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "client",
+                "cards",
                 "reports",
                 "spending"
               ],
@@ -1165,6 +1173,42 @@
               ]
             },
             "description": "Calculates spending, payout amounts, and card cancellation summary for the authenticated client."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Client Cancellation Report (REP-3, CLI-7)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/client/cards/reports/cancellation?from_date=2026-01-01&to_date=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "client",
+                "cards",
+                "reports",
+                "cancellation"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-12-31"
+                }
+              ]
+            },
+            "description": "Retrieves cancellation summary and list of cancelled cards (with masked activation numbers) for the authenticated client."
           },
           "response": []
         }

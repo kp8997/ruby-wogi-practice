@@ -33,5 +33,7 @@ module V1
     mount V1::Admin::Products
     mount V1::Admin::AuditLogs
     mount V1::Admin::Reports
+    mount V1::Client::Products
+    mount V1::Client::Cards
   end
 end

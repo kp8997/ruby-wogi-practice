@@ -35,7 +35,7 @@ module V1
 
       def authorize_client!
         authenticate!
-        error!({ error: "Forbidden", message: "Client access required" }, 403) unless current_user.role_client?
+        error!({ error: "Forbidden", message: "Client access required" }, 403) unless current_user.role_client? && current_client.present?
       end
 
       def current_client
