@@ -111,19 +111,22 @@ BRAND_ID=$(echo "$CREATE_BRAND_RESP" | extract_json "brand.id")
 if [ -n "$BRAND_ID" ]; then
   echo -e "${GREEN}✓ Brand created: ${BRAND_NAME} (ID: ${BRAND_ID})${NC}"
   
-  CREATE_PRODUCT_RESP=$(curl -s -X POST "${BASE_URL}/admin/products" \
+  CREATE_PRODUCT_RESP=$(curl -s -X POST "${BASE_URL}/admin/brands/${BRAND_ID}/products" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-    -d "{
-      \"brand_id\": ${BRAND_ID},
-      \"name\": \"Apex $50 Digital Card\",
-      \"denomination\": 50.00,
-      \"currency\": \"USD\",
-      \"requires_pin\": false,
-      \"state\": \"active\"
-    }")
+    -d '{
+      "name": "Apex Digital Card",
+      "denomination": 50.00,
+      "currency": "USD",
+      "requires_pin": false,
+      "state": "active"
+    }')
   PRODUCT_ID=$(echo "$CREATE_PRODUCT_RESP" | extract_json "product.id")
-  echo -e "${GREEN}✓ Product created: Apex $50 Digital Card (ID: ${PRODUCT_ID})${NC}"
+  if [ -n "$PRODUCT_ID" ]; then
+    echo -e "${GREEN}✓ Product created: Apex \$50 Digital Card (ID: ${PRODUCT_ID})${NC}"
+  else
+    echo -e "${RED}Failed to create product. Response: ${CREATE_PRODUCT_RESP}${NC}"
+  fi
 fi
 
 # -----------------------------------------------------------------------------
@@ -131,10 +134,10 @@ fi
 # -----------------------------------------------------------------------------
 if [ -n "$CLIENT_ID" ] && [ -n "$PRODUCT_ID" ]; then
   echo -e "\n${YELLOW}[5/8] Assigning Product Access to Client (ADM-6)...${NC}"
-  ASSIGN_RESP=$(curl -s -X POST "${BASE_URL}/admin/clients/${CLIENT_ID}/products" \
+  ASSIGN_RESP=$(curl -s -X POST "${BASE_URL}/admin/clients/${CLIENT_ID}/product_accesses" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-    -d "{\"product_ids\": [${PRODUCT_ID}]}")
+    -d "{\"product_id\": ${PRODUCT_ID}}")
   echo -e "${GREEN}✓ Access granted: Client ${CLIENT_ID} -> Product ${PRODUCT_ID}${NC}"
 fi
 

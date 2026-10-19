@@ -257,6 +257,31 @@ module V1
                 response_data[:card][:pin] = pin_to_assign if pin_to_assign.present?
                 response_data
               else
+                # Fallback for concurrent requests with identical idempotency_key
+                if card.errors[:idempotency_key].present?
+                  existing_card = current_client.cards.includes(product: :brand).find_by(idempotency_key: params[:idempotency_key])
+                  if existing_card
+                    status 200
+                    return {
+                      card: {
+                        id: existing_card.id,
+                        product_id: existing_card.product_id,
+                        product_name: existing_card.product.name,
+                        brand_name: existing_card.product.brand.name,
+                        activation_number: existing_card.activation_number,
+                        amount: existing_card.amount,
+                        currency: existing_card.currency,
+                        payout_rate: existing_card.payout_rate,
+                        payout_amount: existing_card.payout_amount,
+                        status: existing_card.status,
+                        issued_at: existing_card.issued_at,
+                        cancelled_at: existing_card.cancelled_at
+                      },
+                      idempotent_replay: true
+                    }
+                  end
+                end
+
                 error!({ error: "Validation Error", details: card.errors.full_messages }, 422)
               end
             end
@@ -316,7 +341,12 @@ module V1
                   message: "Card cancelled successfully"
                 }
               else
-                error!({ error: "Execution Failed", message: "Could not cancel card" }, 422)
+                ::Audit::Recorder.record!(
+                  action: "card.cancel_refused",
+                  record: card,
+                  metadata: { reason: "already_cancelled" }
+                )
+                error!({ error: "Invalid Transition", message: "Card has already been cancelled" }, 422)
               end
             end
           end
