@@ -3,6 +3,9 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Use SECRET_KEY_BASE from environment (or JWT_SECRET_KEY as fallback)
+  config.secret_key_base = ENV["SECRET_KEY_BASE"].presence || ENV["JWT_SECRET_KEY"] || "random_text_312a3810a"
+
   # Code is not reloaded between requests.
   config.enable_reloading = false
 

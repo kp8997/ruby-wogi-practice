@@ -6,6 +6,9 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Fallback test secret key so tests run out-of-the-box on any machine or fork
+  config.secret_key_base = ENV["SECRET_KEY_BASE"].presence || ENV["JWT_SECRET_KEY"].presence || "test_secret_key_base_for_ci_only_32_characters"
+
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 

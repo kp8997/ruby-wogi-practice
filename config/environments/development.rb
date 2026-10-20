@@ -3,6 +3,9 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Fallback development secret key so any developer who forks the repo can run out-of-the-box
+  config.secret_key_base = ENV["SECRET_KEY_BASE"].presence || ENV["JWT_SECRET_KEY"].presence || "765f87387cc3aeb528ee26400c050697627e0c24892ee395394d081a797f6b3629e3699a4238a357c23ff095292dcdf5216ae0973f70f91c73e71f12480483b0"
+
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 
