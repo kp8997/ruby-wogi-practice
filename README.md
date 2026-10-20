@@ -42,6 +42,8 @@ Some configuration detail about project
 
 * Deployment instructions
 
+  CI/CD pipeline deploys to Oracle Cloud VM via GitHub Actions. See [Deployment & CI/CD](#deployment--cicd-oracle-cloud) section below.
+
 * Support
 
   /postman: create importing file for all api along with data, authentication information to quickly test it
@@ -147,6 +149,11 @@ Requires local Ruby `3.4.11` and running PostgreSQL service:
    ```
 
 ---
+
+# DEPLOYMENT & CI/CD (ORACLE CLOUD)
+
+The project includes an automated GitHub Actions CI/CD workflow (`.github/workflows/ci_cd.yml`) that runs tests and deploys directly to your Oracle Cloud Infrastructure (OCI) Compute Instance on every push to `master`.
+
 
 # DESIGN & IMPLEMENTATION STRATEGIES
 This is my working space from requirement to breakdown into relevant thing of system design and flow to achieve the final working API.

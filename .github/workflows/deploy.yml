@@ -1,0 +1,78 @@
+name: Deploy to Oracle Cloud
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: Run RSpec Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: gift_card_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      SECRET_KEY_BASE: test_secret_key_base_for_ci_only_32_characters
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.11
+          bundler-cache: true
+
+      - name: Prepare database
+        run: bin/rails db:test:prepare
+
+      - name: Run test suite
+        run: bundle exec rspec
+
+  deploy:
+    name: Deploy via SSH
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Define project directory using $HOME for absolute path safety
+            PROJECT_DIR="$HOME/ruby-wogi-practice"
+            
+            # Check if directory exists
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo "Project directory not found. Cloning for the first time..."
+              git clone https://github.com/kp8997/ruby-wogi-practice.git "$PROJECT_DIR"
+            fi
+            
+            cd "$PROJECT_DIR"
+            
+            # Pull latest changes
+            git pull origin master
+            
+            # Build and restart all services
+            docker compose -f docker-compose.prod.yml up -d --build
+            
+            # Clean up old dangling images
+            docker image prune -f

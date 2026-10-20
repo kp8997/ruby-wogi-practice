@@ -29,6 +29,6 @@ test:
 # is mounted as a persistent Docker volume in config/deploy.yml.
 production:
   <<: *default
-  database: gift_card_production
-  username: <%= ENV["DATABASE_USERNAME"] %>
-  password: <%= ENV["DATABASE_PASSWORD"] %>
+  database: <%= ENV.fetch("POSTGRES_DB") { "gift_card_production" } %>
+  username: <%= ENV.fetch("DATABASE_USERNAME") { ENV.fetch("POSTGRES_USER") { "postgres" } } %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD") { ENV.fetch("POSTGRES_PASSWORD") { "" } } %>
