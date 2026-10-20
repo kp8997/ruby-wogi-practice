@@ -1,6 +1,6 @@
-# Passwords come from ENV; dev defaults are used only outside production.
+# Passwords come from ENV; dev defaults are used if not provided.
 def seed_password(env_key, dev_default)
-  ENV[env_key].presence || (Rails.env.production? ? raise("#{env_key} must be set in production") : dev_default)
+  ENV[env_key].presence || dev_default
 end
 
 puts "start seeding"
