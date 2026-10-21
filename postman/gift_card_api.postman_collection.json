@@ -757,7 +757,74 @@
           "response": []
         },
         {
-          "name": "4. Assign Product Access to Client (ADM-6)",
+          "name": "4. Update Product (ADM-3, LOG-2)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme $75 E-Gift Card\",\n  \"denomination\": 75.0,\n  \"currency\": \"USD\",\n  \"requires_pin\": false,\n  \"custom_fields\": {\n    \"sku\": \"ACME-75-USD\",\n    \"tier\": \"gold\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/products/{{product_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "products",
+                "{{product_id}}"
+              ]
+            },
+            "description": "Updates product details such as name, denomination, currency, requires_pin, or custom_fields. Generates audit log."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Toggle Product State (ADM-4, LOG-1)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/products/{{product_id}}/state",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "products",
+                "{{product_id}}",
+                "state"
+              ]
+            },
+            "description": "Toggles product state between active and inactive. Generates product.state_change audit log."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Assign Product Access to Client (ADM-6)",
           "request": {
             "method": "POST",
             "header": [
@@ -791,7 +858,7 @@
           "response": []
         },
         {
-          "name": "5. List Client Product Permissions (ADM-6)",
+          "name": "7. List Client Product Permissions (ADM-6)",
           "request": {
             "method": "GET",
             "header": [
@@ -817,7 +884,7 @@
           "response": []
         },
         {
-          "name": "6. Revoke Product Access from Client (ADM-6)",
+          "name": "8. Revoke Product Access from Client (ADM-6)",
           "request": {
             "method": "DELETE",
             "header": [
@@ -844,7 +911,7 @@
           "response": []
         },
         {
-          "name": "7. Soft Delete Product (ADM-3)",
+          "name": "9. Soft Delete Product (ADM-3)",
           "request": {
             "method": "DELETE",
             "header": [
