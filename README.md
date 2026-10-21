@@ -154,20 +154,12 @@ Requires local Ruby `3.4.11` and running PostgreSQL service:
 
 The project includes an automated GitHub Actions CI/CD workflow (`.github/workflows/ci_cd.yml`) that runs tests and deploys directly to your Oracle Cloud Infrastructure (OCI) Compute Instance on every push to `master`.
 
-
 # DESIGN & IMPLEMENTATION STRATEGIES
 This is my working space from requirement to breakdown into relevant thing of system design and flow to achieve the final working API.
 
-Link Excalidraw for details:
-  v1: https://excalidraw.com/#json=G8pbshRMjyxCJiJldNZm8,U04XEYfEBLRVtaV3kWyE0w
-
-  v2: https://excalidraw.com/#json=nfxh5JExjir9jOqFAwFLa,TPHVUdGodrp_sVGQzGmJOw
-
-  v3: https://excalidraw.com/#json=KeLUos_g35wsSBnCmPkpC,wIpI_OKZBravS53lRvW77g
-
-  v4: https://excalidraw.com/#json=fYO_SU0Q_kpRLrfK3znVf,TOuve_cAfWPMxjbI8CLP1A
-
-  v5: https://excalidraw.com/#json=uR3CZ1YzpEU2Am5SZtJ7q,nK_w4PE2qGXQ5y8UOYM25Q
+My workspace for details:
+  
+  Link Excalidraw: https://excalidraw.com/#json=Q20sUy-4Q4mcF9Jw5Ditg,YXud-zh6zto6Pa6aIzS8Mg
 
 Implementation Strategies
   
