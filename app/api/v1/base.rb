@@ -24,6 +24,12 @@ module V1
       error!({ error: "Not Found", message: e.message }, 404)
     end
 
+    # Global Server Error catch
+    rescue_from StandardError do |e|
+      Rails.logger.error("[API Error #{e.class}] #{e.message}\n#{e.backtrace&.first(8)&.join("\n")}")
+      error!({ error: "Internal Server Error", message: Rails.env.production? ? "Something went wrong" : e.message }, 500)
+    end
+
     # Mount resource endpoints
     mount V1::Ping
     mount V1::Auth

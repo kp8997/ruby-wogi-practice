@@ -6,6 +6,12 @@ Rails.application.configure do
   # Fallback development secret key so any developer who forks the repo can run out-of-the-box
   config.secret_key_base = ENV["SECRET_KEY_BASE"].presence || ENV["JWT_SECRET_KEY"].presence || "765f87387cc3aeb528ee26400c050697627e0c24892ee395394d081a797f6b3629e3699a4238a357c23ff095292dcdf5216ae0973f70f91c73e71f12480483b0"
 
+  # Active Record Encryption credentials (supports custom ENV or derives deterministically from secret_key_base)
+  enc_secret = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"].presence || config.secret_key_base
+  config.active_record.encryption.primary_key = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"].presence || Digest::SHA256.hexdigest("#{enc_secret}:primary_key")[0...32]
+  config.active_record.encryption.deterministic_key = ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"].presence || Digest::SHA256.hexdigest("#{enc_secret}:deterministic_key")[0...32]
+  config.active_record.encryption.key_derivation_salt = ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"].presence || Digest::SHA256.hexdigest("#{enc_secret}:key_derivation_salt")[0...32]
+
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 
