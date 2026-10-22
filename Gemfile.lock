@@ -380,8 +380,8 @@ GEM
       logger (~> 1.4)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
-    shoulda-matchers (6.5.0)
-      activesupport (>= 5.2.0)
+    shoulda-matchers (8.0.1)
+      activesupport (>= 7.2)
     solid_cable (4.1.0)
       actioncable (>= 7.2)
       activejob (>= 7.2)
@@ -471,7 +471,7 @@ DEPENDENCIES
   rspec-rails (~> 7.1)
   rubocop-rails-omakase
   selenium-webdriver
-  shoulda-matchers (~> 6.4)
+  shoulda-matchers (~> 8.0)
   solid_cable
   solid_cache
   solid_queue
